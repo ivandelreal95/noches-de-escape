@@ -264,7 +264,6 @@ footer {
 }
 
 .soon { opacity: 0.92; }
-.soon .btn { pointer-events: none; }
 
 @media (max-width: 860px) {
   .hero, .grid-3, .grid-2 { grid-template-columns: 1fr; }

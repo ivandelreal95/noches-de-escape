@@ -79,7 +79,7 @@ export function HomePage() {
             )}
             <div className="btn-row">
               <Link className="btn ghost" to={`/hoteles/${h.id}`}>
-                Ver ficha
+                {h.comingSoon ? "Ver ficha informativa" : "Ver ficha"}
               </Link>
             </div>
           </article>
