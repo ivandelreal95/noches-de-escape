@@ -1,0 +1,26 @@
+# Blueprint de Render: un servicio web + disco persistente para SQLite.
+# El plan gratuito NO incluye disco persistente y se duerme: usamos Starter.
+# Tras conectar el repo, Render pedirá ADMIN_PASSWORD (no lo guardes en git).
+
+services:
+  - type: web
+    name: noches-de-escape
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    disk:
+      name: noches-sqlite
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_PATH
+        value: /data/noches.db
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true

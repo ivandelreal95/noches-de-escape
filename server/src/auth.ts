@@ -9,12 +9,53 @@ export type SessionPayload =
 
 const COOKIE = "nde_session";
 
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+/** Cookie Secure: HTTPS in production; override with COOKIE_SECURE=true|false. */
+export function cookieSecure(): boolean {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.COOKIE_SECURE === "false") return false;
+  return isProduction();
+}
+
+export function sessionCookieOptions(): {
+  httpOnly: true;
+  sameSite: "lax";
+  secure: boolean;
+  path: "/";
+  maxAge: number;
+} {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: cookieSecure(),
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+}
+
 export function sessionSecret(): string {
-  return process.env.SESSION_SECRET || "dev-session-secret-noches-de-escape";
+  const secret = process.env.SESSION_SECRET?.trim();
+  if (secret) return secret;
+  if (isProduction()) {
+    throw new Error(
+      "SESSION_SECRET es obligatorio en producción. Defínelo en el panel del host (Render/Railway).",
+    );
+  }
+  return "dev-session-secret-noches-de-escape";
 }
 
 export function adminPassword(): string {
-  return process.env.ADMIN_PASSWORD || "posada-admin";
+  const password = process.env.ADMIN_PASSWORD;
+  if (password) return password;
+  if (isProduction()) {
+    throw new Error(
+      "ADMIN_PASSWORD es obligatorio en producción. Usa un secreto fuerte; no uses la contraseña de desarrollo.",
+    );
+  }
+  return "posada-admin";
 }
 
 export function signSession(payload: SessionPayload): string {
@@ -40,16 +81,12 @@ export function readSession(token: string | undefined): SessionPayload | null {
 }
 
 export function setSessionCookie(res: Response, payload: SessionPayload): void {
-  res.cookie(COOKIE, signSession(payload), {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  res.cookie(COOKIE, signSession(payload), sessionCookieOptions());
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(COOKIE, { path: "/" });
+  const { maxAge: _maxAge, ...clearOpts } = sessionCookieOptions();
+  res.clearCookie(COOKIE, clearOpts);
 }
 
 export function sessionFromRequest(req: Request): SessionPayload | null {

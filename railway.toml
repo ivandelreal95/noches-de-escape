@@ -1,0 +1,12 @@
+# Railway detecta el Dockerfile. Añade un Volume montado en /data
+# y define DATABASE_PATH=/data/noches.db en Variables.
+# El plan gratuito puede dormir; el volumen sí persiste en Hobby+.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
