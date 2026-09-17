@@ -1,0 +1,14 @@
+node_modules
+client/dist
+data
+.git
+.github
+.env
+*.db
+*.db-wal
+*.db-shm
+*.log
+.DS_Store
+.vite
+coverage
+npm-debug.log

@@ -50,6 +50,9 @@ function viewerId(req: Request): string | undefined {
 export function createApp(db: DatabaseSync) {
   const app = express();
   app.disable("x-powered-by");
+  // Same-origin: Express sirve el SPA. Detrás de HTTPS (Render/Railway) el proxy
+  // manda X-Forwarded-*; trust proxy evita cookies/redirects mal firmados.
+  app.set("trust proxy", 1);
   app.use(express.json({ limit: "64kb" }));
   app.use(cookieParser());
 
@@ -63,7 +66,13 @@ export function createApp(db: DatabaseSync) {
   });
 
   app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, name: "Noches de Escape", phase: 1 });
+    try {
+      db.prepare("SELECT 1 AS ok").get();
+      res.json({ ok: true, name: "Noches de Escape", phase: 1 });
+    } catch (err) {
+      console.error("health db", err);
+      res.status(503).json({ ok: false, name: "Noches de Escape", phase: 1 });
+    }
   });
 
   app.get("/api/status", (_req, res) => {
@@ -444,6 +453,10 @@ export function createApp(db: DatabaseSync) {
       });
     }),
   );
+
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ error: "No encontrado", code: "NOT_FOUND" });
+  });
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof AppError) {

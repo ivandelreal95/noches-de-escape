@@ -27,7 +27,10 @@ export function AdminLoginPage() {
   return (
     <>
       <h1>Panel del hotel</h1>
-      <p className="muted">Contraseña de entorno (ADMIN_PASSWORD). En desarrollo: ver README.</p>
+      <p className="muted">
+        Contraseña del servidor (variable ADMIN_PASSWORD). En internet debe ser un secreto fuerte,
+        configurado en Render o Railway — no la de desarrollo.
+      </p>
       <form className="folio" onSubmit={submit} style={{ maxWidth: 420 }}>
         <label htmlFor="password">Contraseña</label>
         <input id="password" name="password" type="password" autoComplete="current-password" required />
